@@ -45,6 +45,6 @@ PoolConfig ──► PoolFactory ──► ExecutorService   Workload (interface
 - ~~Workload + CpuBoundWorkload and a single fixed pool to get a baseline.~~
 - ~~TaskWrapper + MetricsCollector, so you can measure before you optimize.~~
 - ~~PoolFactory with three strategies: fixed ThreadPoolExecutor, ForkJoinPool, and Executors.newVirtualThreadPerTaskExecutor().~~
-- BlockingIoWorkload (Thread.sleep) to show where the cores-based formula fails and virtual threads win.
+- ~~BlockingIoWorkload (Thread.sleep) to show where the cores-based formula fails and virtual threads win.~~
 - BenchmarkRunner sweep plus ResultReporter.
 - Optional adaptive Tuner, and a bounded queue with backpressure experiment.
