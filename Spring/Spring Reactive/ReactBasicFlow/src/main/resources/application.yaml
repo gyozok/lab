@@ -1,3 +1,7 @@
 spring:
   application:
     name: ReactBasicFlow
+  r2dbc:
+    url: r2dbc:mysql://localhost/spilca_reactive
+    username: root
+    password: rootpassword
