@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  mysql-db:
+    image: mysql:8.0
+    container_name: mysql_server
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: spilca_reactive
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - mysql_network
+
+#  mysql-workbench:
+#    image: lscr.io/linuxserver/mysql-workbench:latest
+#    container_name: mysql_workbench
+#    restart: always
+#    environment:
+#      - PUID=1000
+#      - PGID=1000
+#      - TZ=Etc/UTC
+#    ports:
+#      - "3000:3000"
+#    volumes:
+#      - workbench_config:/config
+#    depends_on:
+#      - mysql-db
+#    networks:
+#      - mysql_network
+
+volumes:
+  mysql_data:
+#  workbench_config:
+
+networks:
+  mysql_network:
+    driver: bridge
+
