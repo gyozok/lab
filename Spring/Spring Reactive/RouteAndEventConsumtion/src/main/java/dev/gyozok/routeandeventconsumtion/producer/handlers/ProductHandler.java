@@ -1,7 +1,7 @@
-package dev.gyozok.routeandeventconsumtion.handlers;
+package dev.gyozok.routeandeventconsumtion.producer.handlers;
 
 import dev.gyozok.routeandeventconsumtion.model.Product;
-import dev.gyozok.routeandeventconsumtion.services.ProductService;
+import dev.gyozok.routeandeventconsumtion.producer.services.ProductService;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;

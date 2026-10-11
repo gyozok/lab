@@ -1,4 +1,4 @@
-package dev.gyozok.routeandeventconsumtion.services;
+package dev.gyozok.routeandeventconsumtion.producer.services;
 
 import dev.gyozok.routeandeventconsumtion.model.Product;
 import org.springframework.stereotype.Service;
