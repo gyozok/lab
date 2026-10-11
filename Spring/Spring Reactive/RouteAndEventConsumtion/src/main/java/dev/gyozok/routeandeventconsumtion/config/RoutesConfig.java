@@ -12,14 +12,8 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 @Configuration
 public class RoutesConfig {
 
-    private final ProductService productService;
-
-    public RoutesConfig(ProductService productService) {
-        this.productService = productService;
-    }
-
     @Bean
-    public RouterFunction<ServerResponse> router() {
+    public RouterFunction<ServerResponse> router(ProductService productService) {
         return RouterFunctions.route()
                 .GET("/products", request ->
                         ServerResponse.ok()
