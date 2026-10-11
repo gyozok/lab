@@ -1,5 +1,6 @@
 package dev.gyozok.routeandeventconsumtion.config;
 
+import dev.gyozok.routeandeventconsumtion.handlers.ProductHandler;
 import dev.gyozok.routeandeventconsumtion.model.Product;
 import dev.gyozok.routeandeventconsumtion.services.ProductService;
 import org.springframework.context.annotation.Bean;
@@ -13,12 +14,9 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 public class RoutesConfig {
 
     @Bean
-    public RouterFunction<ServerResponse> router(ProductService productService) {
+    public RouterFunction<ServerResponse> router(ProductHandler productHandler) {
         return RouterFunctions.route()
-                .GET("/products", request ->
-                        ServerResponse.ok()
-                                .contentType(MediaType.TEXT_EVENT_STREAM)
-                                .body(productService.getAll(), Product.class))
+                .GET("/products", productHandler::getAll)
                 .build();
     }
 
