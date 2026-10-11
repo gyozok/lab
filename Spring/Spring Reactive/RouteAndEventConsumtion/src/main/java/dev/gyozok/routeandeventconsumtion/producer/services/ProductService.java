@@ -11,6 +11,7 @@ import java.util.List;
 public class ProductService {
 
     public Flux<Product> getAll() {
+        //Simulate DB usage
         var p1 = new Product();
         p1.setName("Bear");
         var p2 = new Product();
