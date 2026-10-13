@@ -34,9 +34,16 @@ public class CustomWebSocketHandler implements WebSocketHandler {
 //                .map(session::textMessage);
 
         //use Sinks
-        Flux<WebSocketMessage> f = sink
-                .asFlux()
-                .map(event -> session.textMessage(event));
+//        Flux<WebSocketMessage> f = sink
+//                .asFlux()
+//                .map(event -> session.textMessage(event));
+
+        //receive message from the client to server
+        Flux<WebSocketMessage> f = session.receive()
+                .map(event -> event.getPayloadAsText())
+                .map(text -> new StringBuilder(text).reverse())
+                .map(event -> session.textMessage(event.toString()));
+
         return session.send(f);
     }
 }
