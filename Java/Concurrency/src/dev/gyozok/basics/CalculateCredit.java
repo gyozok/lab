@@ -1,0 +1,97 @@
+package dev.gyozok.basics;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+
+public class CalculateCredit {
+
+    static void main() {
+        CalculateCredit sut = new CalculateCredit();
+        try {
+            var credit = sut.calculateCreditWithUnboundedThreads(1L);
+            System.out.println(credit);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    Credit calculateCreditWithUnboundedThreads(Long personId) throws InterruptedException {
+        Person person = getPerson(personId);
+
+        var assetsRef = new AtomicReference<List<Asset>>();
+        var t1 = new Thread(() -> {
+            var assets = getAssets(person);
+            assetsRef.set(assets);
+        });
+
+        var liabilityesRef = new AtomicReference<List<Liability>>();
+        Thread t2 = new Thread(() -> {
+           var liabilities = getLiabilities(person);
+           liabilityesRef.set(liabilities);
+        });
+
+        var t3 = new Thread(() -> importantWork());
+
+        t1.start();
+        t2.start();
+        t3.start();
+
+        t1.join();
+        t2.join();
+
+        var credit = calculateCredits(assetsRef.get(), liabilityesRef.get());
+
+        t3.join();
+
+        return credit;
+    }
+
+    private Person getPerson(Long personId) {
+        try {
+            Thread.sleep(500L);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        return new Person(1L, "gyozok");
+    }
+
+    private List<Asset> getAssets(Person person) {
+        try {
+            Thread.sleep(5000L);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        var a1 = new Asset("type1", 123.3);
+        var a2 = new Asset("type2", 423.3);
+        return List.of(a1, a2);
+    }
+
+    private List<Liability> getLiabilities(Person person) {
+        try {
+            Thread.sleep(5000L);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        var l1 = new Liability("liab type1", 999.9);
+        var l2 = new Liability("liab type2", 888.8);
+        return List.of(l1, l2);
+    }
+
+    private void importantWork() {
+        try {
+            Thread.sleep(7770L);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private Credit calculateCredits(List<Asset> assets, List<Liability> liabilities) {
+        return new Credit(444.32);
+    }
+}
+
+record Credit(double score) {}
+record Person(Long id, String name) {}
+record Asset(String type, double value) {}
+record Liability(String type, double amount) {}
