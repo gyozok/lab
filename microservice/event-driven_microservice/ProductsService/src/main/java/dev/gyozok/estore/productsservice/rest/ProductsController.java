@@ -1,6 +1,9 @@
 package dev.gyozok.estore.productsservice.rest;
 
 import dev.gyozok.estore.productsservice.commands.CreateProductCommand;
+import org.axonframework.commandhandling.CommandExecutionException;
+import org.axonframework.commandhandling.distributed.CommandDispatchException;
+import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.web.bind.annotation.*;
@@ -12,19 +15,30 @@ import java.util.UUID;
 @RequestMapping("/products")
 public class ProductsController {
 
-    @Autowired
-    private Environment env;
+    private final Environment env;
+    private final CommandGateway commandGateway;
+
+    public ProductsController(Environment env, CommandGateway commandGateway) {
+        this.env = env;
+        this.commandGateway = commandGateway;
+    }
 
     @PostMapping
     public String createProduct(@RequestBody CreateProductRestModel request) {
-        var c = CreateProductCommand.builder()
+        var createProductCommand = CreateProductCommand.builder()
                 .productId(UUID.randomUUID().toString())
                 .title(request.title())
                 .price(request.price())
                 .quantity(request.quantity())
                 .build();
 
-        return "HTTP POST handled" + request;
+        String returnValue = null;
+        try {
+            returnValue = commandGateway.sendAndWait(createProductCommand);
+        } catch (CommandExecutionException | CommandDispatchException e) {
+            returnValue = e.getLocalizedMessage();
+        }
+        return returnValue;
     }
 
     @GetMapping
