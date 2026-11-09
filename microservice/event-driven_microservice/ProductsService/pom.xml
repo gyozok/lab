@@ -54,6 +54,14 @@
 			<version>5.0.3</version>
 			<scope>compile</scope>
 		</dependency>
+
+
+<!--		CQRS, Axon server-->
+		<dependency>
+			<groupId>org.axonframework</groupId>
+			<artifactId>axon-spring-boot-starter</artifactId>
+			<version>4.13.2</version>
+		</dependency>
 	</dependencies>
 
 	<dependencyManagement>
