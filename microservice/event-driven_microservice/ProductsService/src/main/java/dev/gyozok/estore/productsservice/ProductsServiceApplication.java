@@ -7,7 +7,7 @@ import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
 @EnableDiscoveryClient
-//@ComponentScan(basePackages = "dev.gyozok.estore")
+@ComponentScan(basePackages = "dev.gyozok.estore")
 public class ProductsServiceApplication {
 
 	public static void main(String[] args) {
