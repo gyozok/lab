@@ -26,11 +26,11 @@ public class ProductAggregate {
     @CommandHandler
     public ProductAggregate(CreateProductCommand createProductCommand) {
         //Validate Creat Product Command
-        if (createProductCommand.price().compareTo(BigDecimal.ZERO) <= 0) {
+        if (createProductCommand.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("Price must be greater than 0");
         }
-        if (createProductCommand.title() == null ||
-        createProductCommand.title().isBlank()) {
+        if (createProductCommand.getTitle() == null ||
+        createProductCommand.getTitle().isBlank()) {
             throw new IllegalArgumentException("Title cannot be empty");
         }
 

@@ -1,15 +1,17 @@
 package dev.gyozok.estore.productsservice.commands;
 
 import lombok.Builder;
+import lombok.Data;
 import org.axonframework.modelling.command.TargetAggregateIdentifier;
 
 import java.math.BigDecimal;
 
 @Builder
-public record CreateProductCommand (
+@Data
+public class CreateProductCommand {
         @TargetAggregateIdentifier
-        String productId,
-        String title,
-        BigDecimal price,
-        int quantity
-) {}
+        private String productId;
+        private String title;
+        private BigDecimal price;
+        private int quantity;
+}

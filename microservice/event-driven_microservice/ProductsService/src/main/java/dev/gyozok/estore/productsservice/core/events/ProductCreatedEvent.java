@@ -12,10 +12,10 @@ public record ProductCreatedEvent (
 ){
     public static ProductCreatedEvent fromCommand(CreateProductCommand command) {
         return new ProductCreatedEvent(
-          command.productId(),
-          command.title(),
-          command.price(),
-          command.quantity()
+          command.getProductId(),
+          command.getTitle(),
+          command.getPrice(),
+          command.getQuantity()
         );
     }
 }

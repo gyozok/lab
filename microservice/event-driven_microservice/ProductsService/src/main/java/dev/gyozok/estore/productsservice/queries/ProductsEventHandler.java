@@ -18,6 +18,10 @@ public class ProductsEventHandler {
 
     @EventHandler
     public void on(ProductCreatedEvent event) {
+//        idempotent event handling
+        if (productsRepository.existsByTitle(event.title())) {
+            return;
+        }
         ProductEntity productEntity = new ProductEntity();
         BeanUtils.copyProperties(event, productEntity);
 

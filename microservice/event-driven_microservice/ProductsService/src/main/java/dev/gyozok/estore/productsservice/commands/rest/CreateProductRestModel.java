@@ -1,4 +1,4 @@
-package dev.gyozok.estore.productsservice.rest;
+package dev.gyozok.estore.productsservice.commands.rest;
 
 import java.math.BigDecimal;
 

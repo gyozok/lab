@@ -10,4 +10,5 @@ public interface ProductsRepository extends JpaRepository<ProductEntity, String>
 
     Optional<ProductEntity> findByProductIdOrTitle(String productId, String title);
 
+    boolean existsByTitle(String title);
 }
