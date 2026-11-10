@@ -32,11 +32,11 @@ public class ProductsCommandController {
                 .build();
 
         String returnValue = null;
-        try {
+//        try {
             returnValue = commandGateway.sendAndWait(createProductCommand);
-        } catch (CommandExecutionException | CommandDispatchException e) {
-            returnValue = e.getLocalizedMessage();
-        }
+//        } catch (CommandExecutionException | CommandDispatchException e) {
+//            returnValue = e.getLocalizedMessage();
+//        }
         return returnValue;
     }
 

@@ -5,6 +5,7 @@ import dev.gyozok.estore.productsservice.core.data.ProductsRepository;
 import dev.gyozok.estore.productsservice.core.events.ProductCreatedEvent;
 import org.axonframework.config.ProcessingGroup;
 import org.axonframework.eventhandling.EventHandler;
+import org.axonframework.messaging.interceptors.ExceptionHandler;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Component;
 
@@ -18,15 +19,27 @@ public class ProductsEventHandler {
         this.productsRepository = productsRepository;
     }
 
+    @ExceptionHandler(resultType= Exception.class)
+    public void handle(Exception exception) throws Exception{
+        throw exception;
+    }
+
+    @ExceptionHandler(resultType= IllegalStateException.class)
+    public void handle(IllegalArgumentException exception) {
+        //log error message
+    }
+
     @EventHandler
-    public void on(ProductCreatedEvent event) {
-//        idempotent event handling
-        if (productsRepository.existsByTitle(event.title())) {
-            return;
-        }
+    public void on(ProductCreatedEvent event) throws Exception {
         ProductEntity productEntity = new ProductEntity();
         BeanUtils.copyProperties(event, productEntity);
 
-        productsRepository.save(productEntity);
+        try {
+            productsRepository.save(productEntity);
+        } catch (IllegalArgumentException ex) {
+            ex.printStackTrace();
+        }
+
+        if (true) throw new Exception("Forcing exception in the Event Handler class");
     }
 }

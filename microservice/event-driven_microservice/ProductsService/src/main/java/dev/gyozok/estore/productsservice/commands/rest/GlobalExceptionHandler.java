@@ -30,11 +30,4 @@ public class GlobalExceptionHandler {
         return errors;
     }
 
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(IllegalStateException.class)
-    @ResponseBody
-    public String handleDuplicationException(IllegalStateException ex) {
-        return ex.getLocalizedMessage();
-
-    }
 }
