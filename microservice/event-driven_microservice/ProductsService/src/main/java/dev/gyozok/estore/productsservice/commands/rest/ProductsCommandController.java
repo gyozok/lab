@@ -1,6 +1,7 @@
 package dev.gyozok.estore.productsservice.commands.rest;
 
 import dev.gyozok.estore.productsservice.commands.CreateProductCommand;
+import jakarta.validation.Valid;
 import org.axonframework.commandhandling.CommandExecutionException;
 import org.axonframework.commandhandling.distributed.CommandDispatchException;
 import org.axonframework.commandhandling.gateway.CommandGateway;
@@ -22,7 +23,7 @@ public class ProductsCommandController {
     }
 
     @PostMapping
-    public String createProduct(@RequestBody CreateProductRestModel request) {
+    public String createProduct(@Valid @RequestBody CreateProductRestModel request) {
         var createProductCommand = CreateProductCommand.builder()
                 .productId(UUID.randomUUID().toString())
                 .title(request.title())
@@ -39,18 +40,4 @@ public class ProductsCommandController {
         return returnValue;
     }
 
-//    @GetMapping
-//    public String getProduct() {
-//        return "HTTP GET Handled " +env.getProperty("local.server.port");
-//    }
-//
-//    @PutMapping
-//    public String updateProduct() {
-//        return "HTTP PUT Handled";
-//    }
-//
-//    @DeleteMapping
-//    public String deleteProduct() {
-//        return "HTTP DELETE Handled";
-//    }
 }

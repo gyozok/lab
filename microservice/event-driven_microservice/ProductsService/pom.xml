@@ -78,6 +78,12 @@
 			<artifactId>spring-boot-h2console</artifactId>
 			<scope>compile</scope>
 		</dependency>
+
+<!--		Validation-->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-validation</artifactId>
+		</dependency>
 	</dependencies>
 
 	<dependencyManagement>
