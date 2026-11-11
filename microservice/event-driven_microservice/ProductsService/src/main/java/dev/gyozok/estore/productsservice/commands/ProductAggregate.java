@@ -1,5 +1,6 @@
 package dev.gyozok.estore.productsservice.commands;
 
+import dev.gyozok.estore.core.commands.ReserveProductCommand;
 import dev.gyozok.estore.productsservice.core.events.ProductCreatedEvent;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.eventsourcing.EventSourcingHandler;
@@ -49,6 +50,13 @@ public class ProductAggregate {
         this.quantity = productCreatedEvent.quantity();
     }
 
+
+    @CommandHandler
+    public ProductAggregate(ReserveProductCommand reserveProductCommand) {
+        if (this.quantity < reserveProductCommand.getQuantity()) {
+            throw new IllegalArgumentException("Insufficient number of items in stock");
+        }
+    }
 
 
 
