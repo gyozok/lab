@@ -91,6 +91,12 @@
 			<version>33.8.0-jre</version>
 			<scope>compile</scope>
 		</dependency>
+<!--		Core dependency-->
+		<dependency>
+			<groupId>dev.gyozok</groupId>
+			<artifactId>core</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
 	</dependencies>
 	<dependencyManagement>
 		<dependencies>
