@@ -1,5 +1,6 @@
 package dev.gyozok.estore.productsservice.queries;
 
+import dev.gyozok.estore.core.events.ProductReservedEvent;
 import dev.gyozok.estore.productsservice.core.data.ProductEntity;
 import dev.gyozok.estore.productsservice.core.data.ProductsRepository;
 import dev.gyozok.estore.productsservice.core.events.ProductCreatedEvent;
@@ -39,7 +40,13 @@ public class ProductsEventHandler {
         } catch (IllegalArgumentException ex) {
             ex.printStackTrace();
         }
+    }
 
-        if (true) throw new Exception("Forcing exception in the Event Handler class");
+    @EventHandler
+    public void on(ProductReservedEvent productReservedEvent) {
+        ProductEntity productEntity = productsRepository.findByProductId(productReservedEvent.getProductId());
+        int quantity = productEntity.getQuantity();
+        productEntity.setQuantity(quantity - productReservedEvent.getQuantity());
+        productsRepository.save(productEntity);
     }
 }
