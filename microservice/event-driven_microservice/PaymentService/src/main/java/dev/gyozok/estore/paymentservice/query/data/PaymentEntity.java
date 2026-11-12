@@ -1,0 +1,20 @@
+package dev.gyozok.estore.paymentservice.query.data;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.Data;
+
+@Entity
+@Table(name = "payments")
+@Data
+public class PaymentEntity {
+
+    private static final long serialVersionUID = 5313493413859894403L;
+
+    @Id
+    private String paymentId;
+    @Column(unique = true)
+    public String orderId;
+}

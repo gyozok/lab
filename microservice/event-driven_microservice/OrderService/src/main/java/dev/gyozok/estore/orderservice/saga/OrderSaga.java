@@ -1,5 +1,6 @@
 package dev.gyozok.estore.orderservice.saga;
 
+import dev.gyozok.estore.core.commands.ProcessPaymentCommand;
 import dev.gyozok.estore.core.commands.ReserveProductCommand;
 import dev.gyozok.estore.core.events.ProductReservedEvent;
 import dev.gyozok.estore.core.model.User;
@@ -15,7 +16,9 @@ import org.axonframework.queryhandling.QueryGateway;
 import org.axonframework.spring.stereotype.Saga;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 @Saga
 @Slf4j
@@ -89,5 +92,22 @@ public class OrderSaga {
 
         log.info("Successfully fetched user payment details for user " + userPaymentDetails.getFirstName());
 
+        ProcessPaymentCommand processPaymentCommand = ProcessPaymentCommand.builder()
+                .orderId(productReservedEvent.getOrderId())
+                .paymentDetails(userPaymentDetails.getPaymentDetails())
+                .paymentId(UUID.randomUUID().toString())
+                .build();
+        String result = null;
+        try {
+            result = commandGateway.sendAndWait(processPaymentCommand, 10, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            // Start compensating transaction
+        }
+
+        if (result == null) {
+            log.info("The ProcessPaymentCommand resulted is NULL. Initializing a compensating transaction");
+            // Start compensating transaction
+        }
     }
 }
