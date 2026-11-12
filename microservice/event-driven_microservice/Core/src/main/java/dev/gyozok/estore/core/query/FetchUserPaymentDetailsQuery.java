@@ -1,10 +1,10 @@
 package dev.gyozok.estore.core.query;
 
-import lombok.Builder;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
-@Builder
+@AllArgsConstructor
 public class FetchUserPaymentDetailsQuery {
     private String userId;
 }
