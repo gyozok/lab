@@ -15,7 +15,7 @@ public record CreateProductRestModel(
         BigDecimal price,
 
         @Min(value = 1, message = "Quantity cannot be lower than 1")
-        @Max(value = 5, message = "Quantity cannot be greater than 5")
+        @Max(value = 500, message = "Quantity cannot be greater than 500")
         int quantity
 ) {
 }

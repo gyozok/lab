@@ -1,7 +1,9 @@
 package dev.gyozok.estore.orderservice.saga;
 
 import dev.gyozok.estore.core.commands.ReserveProductCommand;
+import dev.gyozok.estore.core.events.ProductReservedEvent;
 import dev.gyozok.estore.orderservice.core.events.OrderCreatedEvent;
+import lombok.extern.slf4j.Slf4j;
 import org.axonframework.commandhandling.CommandCallback;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.modelling.saga.SagaEventHandler;
@@ -10,6 +12,7 @@ import org.axonframework.spring.stereotype.Saga;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Saga
+@Slf4j
 public class OrderSaga {
 
     @Autowired
@@ -24,6 +27,9 @@ public class OrderSaga {
                 .quantity(orderCreatedEvent.getQuantity())
                 .userId(orderCreatedEvent.getUserId())
                 .build();
+
+        log.info("OrderCreatedEvent handled for orderId: " + reserveProductCommand.getOrderId()
+        + " productId: " + reserveProductCommand.getProductId());
 
         //send the command and use a callback
         commandGateway.send(
@@ -40,5 +46,12 @@ public class OrderSaga {
                     }
                 }
         );
+    }
+
+    @SagaEventHandler(associationProperty = "orderId")
+    public void handle(ProductReservedEvent productReservedEvent) {
+        //process user payment
+        log.info("ProductReservedEvent handled for orderId: " + productReservedEvent.getOrderId()
+                + " productId: " + productReservedEvent.getProductId());
     }
 }
