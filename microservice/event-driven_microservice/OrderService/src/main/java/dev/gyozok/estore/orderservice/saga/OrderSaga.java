@@ -15,6 +15,8 @@ import dev.gyozok.estore.orderservice.core.events.OrderCreatedEvent;
 import dev.gyozok.estore.orderservice.core.events.OrderRejectedEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.axonframework.commandhandling.gateway.CommandGateway;
+import org.axonframework.deadline.DeadlineManager;
+import org.axonframework.deadline.annotation.DeadlineHandler;
 import org.axonframework.messaging.responsetypes.ResponseTypes;
 import org.axonframework.modelling.saga.EndSaga;
 import org.axonframework.modelling.saga.SagaEventHandler;
@@ -23,19 +25,25 @@ import org.axonframework.queryhandling.QueryGateway;
 import org.axonframework.spring.stereotype.Saga;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 
 @Saga
 @Slf4j
 public class OrderSaga {
+
+    private static final String PAYMENT_PROCESSING_TIMEOUT_DEADLINE = "payment-processing-deadline";
 
     @Autowired
     private transient CommandGateway commandGateway;
 
     @Autowired
     private transient QueryGateway queryGateway;
+
+    @Autowired
+    private transient DeadlineManager deadlineManager;
 
 //    public OrderSaga(QueryGateway queryGateway, CommandGateway commandGateway) {
 //        this.queryGateway = queryGateway;
@@ -88,19 +96,27 @@ public class OrderSaga {
         } catch (Exception e) {
             log.error(e.getMessage());
             // Start a compensating transaction
-            cancelProductResrervation(productReservedEvent, e.getMessage());
+            cancelProductReservation(productReservedEvent, e.getMessage());
 
             return;
         }
 
         if (userPaymentDetails == null) {
             //Start compensating transaction
-            cancelProductResrervation(productReservedEvent, "Could not fetch user payment details.");
+            cancelProductReservation(productReservedEvent, "Could not fetch user payment details.");
 
             return;
         }
 
         log.info("Successfully fetched user payment details for user " + userPaymentDetails.getFirstName());
+
+        deadlineManager.schedule(
+                Duration.of(10, ChronoUnit.SECONDS),
+                PAYMENT_PROCESSING_TIMEOUT_DEADLINE,
+                productReservedEvent);
+
+        //just for testing purpose of deadline test
+        if (true) return;
 
         ProcessPaymentCommand processPaymentCommand = ProcessPaymentCommand.builder()
                 .orderId(productReservedEvent.getOrderId())
@@ -109,23 +125,27 @@ public class OrderSaga {
                 .build();
         String result = null;
         try {
-            result = commandGateway.sendAndWait(processPaymentCommand, 10, TimeUnit.SECONDS);
+//            result = commandGateway.sendAndWait(processPaymentCommand, 10, TimeUnit.SECONDS);
+            result = commandGateway.sendAndWait(processPaymentCommand);
+
         } catch (Exception e) {
             log.error(e.getMessage());
             // Start compensating transaction
-            cancelProductResrervation(productReservedEvent, e.getMessage());
+            cancelProductReservation(productReservedEvent, e.getMessage());
             return;
         }
 
         if (result == null) {
             log.info("The ProcessPaymentCommand resulted is NULL. Initializing a compensating transaction");
             // Start compensating transaction
-            cancelProductResrervation(productReservedEvent, "Could not process user payment with provided payment details.");
+            cancelProductReservation(productReservedEvent, "Could not process user payment with provided payment details.");
         }
     }
 
     @SagaEventHandler(associationProperty = "orderId")
     public void handle(PaymentProcessedEvent paymentProcessedEvent) {
+
+        deadlineManager.cancelAll(PAYMENT_PROCESSING_TIMEOUT_DEADLINE);
         //Send ApproveOrderCommand
         ApproveOrderCommand approveOrderCommand = new ApproveOrderCommand(paymentProcessedEvent.getOrderId());
 
@@ -155,7 +175,13 @@ public class OrderSaga {
         log.info("Successfully rejected order with id: " + orderRejectedEvent.getOrderId());
     }
 
-    private void cancelProductResrervation(ProductReservedEvent productReservedEvent, String reason) {
+    @DeadlineHandler(deadlineName = PAYMENT_PROCESSING_TIMEOUT_DEADLINE)
+    public void handlePaymentDeadline(ProductReservedEvent productReservedEvent) {
+        log.info("Payment processing deadline took place. Sending a compensating command to cancel the product reservation");
+        cancelProductReservation(productReservedEvent, "Payment deadline");
+    }
+
+    private void cancelProductReservation(ProductReservedEvent productReservedEvent, String reason) {
 
         CancelProductReservationCommand cancelProductReservationCommand =
                 CancelProductReservationCommand.builder()
