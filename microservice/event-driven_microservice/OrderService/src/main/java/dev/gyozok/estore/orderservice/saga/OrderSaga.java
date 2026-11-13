@@ -1,16 +1,22 @@
 package dev.gyozok.estore.orderservice.saga;
 
+import com.google.protobuf.ApiProto;
 import dev.gyozok.estore.core.commands.ProcessPaymentCommand;
 import dev.gyozok.estore.core.commands.ReserveProductCommand;
+import dev.gyozok.estore.core.events.PaymentProcessedEvent;
 import dev.gyozok.estore.core.events.ProductReservedEvent;
 import dev.gyozok.estore.core.model.User;
 import dev.gyozok.estore.core.query.FetchUserPaymentDetailsQuery;
+import dev.gyozok.estore.orderservice.command.commands.ApproveOrderCommand;
+import dev.gyozok.estore.orderservice.core.events.OrderApprovedEvent;
 import dev.gyozok.estore.orderservice.core.events.OrderCreatedEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.axonframework.commandhandling.CommandCallback;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.messaging.responsetypes.ResponseTypes;
+import org.axonframework.modelling.saga.EndSaga;
 import org.axonframework.modelling.saga.SagaEventHandler;
+import org.axonframework.modelling.saga.SagaLifecycle;
 import org.axonframework.modelling.saga.StartSaga;
 import org.axonframework.queryhandling.QueryGateway;
 import org.axonframework.spring.stereotype.Saga;
@@ -109,5 +115,20 @@ public class OrderSaga {
             log.info("The ProcessPaymentCommand resulted is NULL. Initializing a compensating transaction");
             // Start compensating transaction
         }
+    }
+
+    @SagaEventHandler(associationProperty = "orderId")
+    public void handle(PaymentProcessedEvent paymentProcessedEvent) {
+        //Send ApproveOrderCommand
+        ApproveOrderCommand approveOrderCommand = new ApproveOrderCommand(paymentProcessedEvent.getOrderId());
+
+        commandGateway.send(approveOrderCommand);
+    }
+
+    @EndSaga
+    @SagaEventHandler(associationProperty = "orderId")
+    public void handle(OrderApprovedEvent orderApprovedEvent) {
+        log.info("Order is approved, Order Saga is complete for orderId: " + orderApprovedEvent.getOrderId());
+//        SagaLifecycle.end();
     }
 }

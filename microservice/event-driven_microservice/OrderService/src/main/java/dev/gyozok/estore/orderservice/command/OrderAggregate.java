@@ -1,6 +1,8 @@
 package dev.gyozok.estore.orderservice.command;
 
+import dev.gyozok.estore.orderservice.command.commands.ApproveOrderCommand;
 import dev.gyozok.estore.orderservice.command.commands.CreatedOrderCommand;
+import dev.gyozok.estore.orderservice.core.events.OrderApprovedEvent;
 import dev.gyozok.estore.orderservice.core.events.OrderCreatedEvent;
 import dev.gyozok.estore.orderservice.core.model.OrderStatus;
 import org.axonframework.commandhandling.CommandHandler;
@@ -40,4 +42,21 @@ public class OrderAggregate {
         this.addressId = orderCreatedEvent.getAddressId();
         this.orderStatus = orderCreatedEvent.getOrderStatus();
     }
+
+    @CommandHandler
+    public void handle(ApproveOrderCommand approveOrderCommand) {
+        OrderApprovedEvent orderApprovedEvent = new OrderApprovedEvent(
+            approveOrderCommand.getOrderId(),
+            OrderStatus.APPROVED
+        );
+
+        AggregateLifecycle.apply(orderApprovedEvent);
+    }
+
+    @EventSourcingHandler
+    public void on(OrderApprovedEvent orderApprovedEvent) {
+        this.orderStatus = orderApprovedEvent.getOrderStatus();
+    }
+
+
 }

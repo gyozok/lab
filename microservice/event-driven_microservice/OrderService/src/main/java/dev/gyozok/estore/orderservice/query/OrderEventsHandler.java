@@ -1,5 +1,6 @@
 package dev.gyozok.estore.orderservice.query;
 
+import dev.gyozok.estore.orderservice.core.events.OrderApprovedEvent;
 import dev.gyozok.estore.orderservice.core.events.OrderCreatedEvent;
 import dev.gyozok.estore.orderservice.query.data.OrderEntity;
 import dev.gyozok.estore.orderservice.query.data.OrdersRepository;
@@ -28,5 +29,17 @@ public class OrderEventsHandler {
         } catch (IllegalArgumentException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @EventHandler
+    public void on(OrderApprovedEvent event) {
+        OrderEntity orderEntity = ordersRepository.findByOrderId(event.getOrderId());
+        if (orderEntity == null) {
+            //Do something about it
+            return;
+        }
+        orderEntity.setOrderStatus(event.getOrderStatus());
+
+        ordersRepository.save(orderEntity);
     }
 }
