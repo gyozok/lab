@@ -1,7 +1,9 @@
 package dev.gyozok.estore.productsservice.commands;
 
 import dev.gyozok.estore.core.commands.ReserveProductCommand;
+import dev.gyozok.estore.core.commands.compensating.CancelProductReservationCommand;
 import dev.gyozok.estore.core.events.ProductReservedEvent;
+import dev.gyozok.estore.core.events.compensating.ProductReservationCancelledEvent;
 import dev.gyozok.estore.productsservice.core.events.ProductCreatedEvent;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.eventsourcing.EventSourcingHandler;
@@ -73,6 +75,25 @@ public class ProductAggregate {
         this.quantity -= productReservedEvent.getQuantity();
     }
 
+    @CommandHandler
+    public void handle(CancelProductReservationCommand cancelProductReservationCommand) {
+        ProductReservationCancelledEvent productReservationCancelledEvent =
+                ProductReservationCancelledEvent.builder()
+                        .orderId(cancelProductReservationCommand.getOrderId())
+                        .productId(cancelProductReservationCommand.getProductId())
+                        .quantity(cancelProductReservationCommand.getQuantity())
+                        .reason(cancelProductReservationCommand.getReason())
+                        .userId(cancelProductReservationCommand.getUserId())
+                        .build();
+
+        AggregateLifecycle.apply(productReservationCancelledEvent);
+    }
+
+    @EventSourcingHandler
+    public void handle(ProductReservationCancelledEvent productReservationCancelledEvent) {
+        //This is the compensating of ProductReservedEvent
+        this.quantity += productReservationCancelledEvent.getQuantity();
+    }
 
 
 }

@@ -2,6 +2,7 @@ package dev.gyozok.estore.orderservice.query;
 
 import dev.gyozok.estore.orderservice.core.events.OrderApprovedEvent;
 import dev.gyozok.estore.orderservice.core.events.OrderCreatedEvent;
+import dev.gyozok.estore.orderservice.core.events.OrderRejectedEvent;
 import dev.gyozok.estore.orderservice.query.data.OrderEntity;
 import dev.gyozok.estore.orderservice.query.data.OrdersRepository;
 import org.axonframework.config.ProcessingGroup;
@@ -40,6 +41,13 @@ public class OrderEventsHandler {
         }
         orderEntity.setOrderStatus(event.getOrderStatus());
 
+        ordersRepository.save(orderEntity);
+    }
+
+    @EventHandler
+    public void on(OrderRejectedEvent orderRejectedEvent) {
+        OrderEntity orderEntity = ordersRepository.findByOrderId(orderRejectedEvent.getOrderId());
+        orderEntity.setOrderStatus(orderRejectedEvent.getOrderStatus());
         ordersRepository.save(orderEntity);
     }
 }
