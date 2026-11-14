@@ -45,6 +45,8 @@ public class OrderSaga {
     @Autowired
     private transient DeadlineManager deadlineManager;
 
+    private String scheduleId;
+
 //    public OrderSaga(QueryGateway queryGateway, CommandGateway commandGateway) {
 //        this.queryGateway = queryGateway;
 //        this.commandGateway = commandGateway;
@@ -110,13 +112,13 @@ public class OrderSaga {
 
         log.info("Successfully fetched user payment details for user " + userPaymentDetails.getFirstName());
 
-        deadlineManager.schedule(
-                Duration.of(10, ChronoUnit.SECONDS),
+        scheduleId = deadlineManager.schedule(
+                Duration.of(120, ChronoUnit.SECONDS),
                 PAYMENT_PROCESSING_TIMEOUT_DEADLINE,
                 productReservedEvent);
 
         //just for testing purpose of deadline test
-        if (true) return;
+//        if (true) return;
 
         ProcessPaymentCommand processPaymentCommand = ProcessPaymentCommand.builder()
                 .orderId(productReservedEvent.getOrderId())
@@ -145,7 +147,8 @@ public class OrderSaga {
     @SagaEventHandler(associationProperty = "orderId")
     public void handle(PaymentProcessedEvent paymentProcessedEvent) {
 
-        deadlineManager.cancelAll(PAYMENT_PROCESSING_TIMEOUT_DEADLINE);
+        cancelDeadline();
+
         //Send ApproveOrderCommand
         ApproveOrderCommand approveOrderCommand = new ApproveOrderCommand(paymentProcessedEvent.getOrderId());
 
@@ -182,6 +185,7 @@ public class OrderSaga {
     }
 
     private void cancelProductReservation(ProductReservedEvent productReservedEvent, String reason) {
+        cancelDeadline();
 
         CancelProductReservationCommand cancelProductReservationCommand =
                 CancelProductReservationCommand.builder()
@@ -193,5 +197,13 @@ public class OrderSaga {
                         .build();
 
         commandGateway.send(cancelProductReservationCommand);
+    }
+
+    private void cancelDeadline() {
+        if (scheduleId != null) {
+//            deadlineManager.cancelAll(PAYMENT_PROCESSING_TIMEOUT_DEADLINE);
+            deadlineManager.cancelSchedule(PAYMENT_PROCESSING_TIMEOUT_DEADLINE, scheduleId);
+            scheduleId = null;
+        }
     }
 }
