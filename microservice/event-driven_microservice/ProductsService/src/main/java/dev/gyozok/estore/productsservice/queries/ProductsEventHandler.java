@@ -5,9 +5,11 @@ import dev.gyozok.estore.core.events.compensating.ProductReservationCancelledEve
 import dev.gyozok.estore.productsservice.core.data.ProductEntity;
 import dev.gyozok.estore.productsservice.core.data.ProductsRepository;
 import dev.gyozok.estore.productsservice.core.events.ProductCreatedEvent;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.axonframework.config.ProcessingGroup;
 import org.axonframework.eventhandling.EventHandler;
+import org.axonframework.eventhandling.ResetHandler;
 import org.axonframework.messaging.interceptors.ExceptionHandler;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Component;
@@ -72,5 +74,11 @@ public class ProductsEventHandler {
         productsRepository.save(currentlyStoredProduct);
 
         log.debug("ProductReservationCancelledEvent: NEW product quantity: " + currentlyStoredProduct.getQuantity());
+    }
+
+    @ResetHandler
+    @Transactional
+    public void reset() {
+        productsRepository.deleteAll();
     }
 }
